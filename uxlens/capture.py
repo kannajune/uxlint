@@ -6,6 +6,7 @@ because most CRO heuristics care about what the visitor sees first.
 
 from __future__ import annotations
 
+import concurrent.futures
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -52,17 +53,24 @@ def capture(
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page(viewport={"width": vw, "height": vh})
-        try:
-            page.goto(url, wait_until="networkidle", timeout=30_000)
-        except Exception:
-            # networkidle can hang on chatty sites; fall back to DOM-ready.
-            page.goto(url, wait_until="domcontentloaded", timeout=30_000)
-        page.wait_for_timeout(wait_ms)
-        page.screenshot(path=str(out_path), full_page=full_page)
-        browser.close()
+    def _shoot() -> None:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page(viewport={"width": vw, "height": vh})
+            try:
+                page.goto(url, wait_until="networkidle", timeout=30_000)
+            except Exception:
+                # networkidle can hang on chatty sites; fall back to DOM-ready.
+                page.goto(url, wait_until="domcontentloaded", timeout=30_000)
+            page.wait_for_timeout(wait_ms)
+            page.screenshot(path=str(out_path), full_page=full_page)
+            browser.close()
+
+    # Playwright's sync API refuses to run inside a live asyncio loop (Colab,
+    # Jupyter). Running it in a worker thread sidesteps that — the new thread
+    # has no running loop. This is a no-op cost in plain scripts.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+        ex.submit(_shoot).result()
 
     width, height = (vw, vh) if not full_page else _image_size(out_path)
     return Screenshot(str(out_path), width, height, viewport)
