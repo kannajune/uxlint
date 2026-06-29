@@ -1,0 +1,117 @@
+{
+  "url": "https://example.com",
+  "viewport": "desktop",
+  "screenshot_path": "/Users/kd/Sid/uxlint/docs/_work/screenshot.png",
+  "image_width": 1366,
+  "image_height": 768,
+  "score": 61,
+  "findings": [
+    {
+      "rule_id": "cta-above-fold",
+      "title": "Primary CTA sits low on the page",
+      "severity": "warning",
+      "message": "The primary CTA is near the bottom of the first screen.",
+      "recommendation": "Move the main CTA higher so it is seen immediately.",
+      "boxes": [
+        {
+          "label": "primary call-to-action button",
+          "x1": 136.6,
+          "y1": 675.84,
+          "x2": 409.8,
+          "y2": 729.5999999999999,
+          "score": 0.9
+        }
+      ]
+    },
+    {
+      "rule_id": "cta-single-primary",
+      "title": "Competing primary CTAs",
+      "severity": "warning",
+      "message": "2 elements look like primary CTAs above the fold.",
+      "recommendation": "Keep one visually dominant primary action; demote the rest to secondary styling to avoid choice paralysis.",
+      "boxes": [
+        {
+          "label": "primary call-to-action button",
+          "x1": 136.6,
+          "y1": 675.84,
+          "x2": 409.8,
+          "y2": 729.5999999999999,
+          "score": 0.9
+        },
+        {
+          "label": "primary call-to-action button",
+          "x1": 819.6,
+          "y1": 675.84,
+          "x2": 1092.8,
+          "y2": 729.5999999999999,
+          "score": 0.8
+        }
+      ]
+    },
+    {
+      "rule_id": "form-friction",
+      "title": "Signup form may have too many fields",
+      "severity": "warning",
+      "message": "6 input fields detected above the fold.",
+      "recommendation": "Ask only for what you truly need now; defer the rest to after signup. Every removed field lifts completion.",
+      "boxes": [
+        {
+          "label": "form input field",
+          "x1": 478.09999999999997,
+          "y1": 230.39999999999998,
+          "x2": 887.9,
+          "y2": 248.39999999999998,
+          "score": 0.8
+        },
+        {
+          "label": "form input field",
+          "x1": 478.09999999999997,
+          "y1": 284.15999999999997,
+          "x2": 887.9,
+          "y2": 302.15999999999997,
+          "score": 0.8
+        },
+        {
+          "label": "form input field",
+          "x1": 478.09999999999997,
+          "y1": 337.92,
+          "x2": 887.9,
+          "y2": 355.92,
+          "score": 0.8
+        },
+        {
+          "label": "form input field",
+          "x1": 478.09999999999997,
+          "y1": 391.68,
+          "x2": 887.9,
+          "y2": 409.68,
+          "score": 0.8
+        },
+        {
+          "label": "form input field",
+          "x1": 478.09999999999997,
+          "y1": 445.44000000000005,
+          "x2": 887.9,
+          "y2": 463.44000000000005,
+          "score": 0.8
+        },
+        {
+          "label": "form input field",
+          "x1": 478.09999999999997,
+          "y1": 499.20000000000005,
+          "x2": 887.9,
+          "y2": 517.2,
+          "score": 0.8
+        }
+      ]
+    },
+    {
+      "rule_id": "trust-signals",
+      "title": "No trust signals near the top",
+      "severity": "info",
+      "message": "No testimonial, rating, logo wall, or security badge was located in the first screenful.",
+      "recommendation": "Add social proof above the fold (logos, ratings, a short testimonial) to reduce hesitation before the CTA.",
+      "boxes": []
+    }
+  ]
+}

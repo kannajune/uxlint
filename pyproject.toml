@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "uxlint"
+version = "0.1.0"
+description = "A linter for your landing pages — screenshot a URL, locate the UX elements, and get ranked conversion (CRO) findings."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Kannan" }]
+keywords = ["cro", "ux", "conversion", "audit", "vision", "landing-page", "playwright"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "playwright>=1.40",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+# The real LocateAnything backend (heavy: needs torch + a GPU ideally).
+model = [
+    "torch>=2.1",
+    "transformers>=4.44",
+    "accelerate>=0.30",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+uxlint = "uxlint.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/kannajune/uxlint"
+Issues = "https://github.com/kannajune/uxlint/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["uxlint"]
