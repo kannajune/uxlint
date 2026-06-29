@@ -58,6 +58,13 @@ The **locator** is pluggable:
 > The `mock` backend fabricates deterministic boxes so you can see the whole
 > tool run with zero setup. Swap to `--backend locate-anything` for real vision.
 
+> ⚠️ **Licence:** uxlens is MIT, but the `locate-anything` backend uses
+> [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B), which is
+> **non-commercial** (research/personal use only). Use it accordingly.
+
+**No GPU?** Run the real backend on a free Colab GPU:
+[`examples/uxlens_locate_anything_colab.ipynb`](examples/uxlens_locate_anything_colab.ipynb).
+
 ## Install
 
 ```bash
