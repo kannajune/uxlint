@@ -28,7 +28,13 @@ COORD_SCALE = 1000.0
 
 
 class LocateAnythingLocator:
-    def __init__(self, model: str = DEFAULT_MODEL, device: str | None = None) -> None:
+    def __init__(
+        self,
+        model: str = DEFAULT_MODEL,
+        device: str | None = None,
+        max_new_tokens: int = 512,
+        max_image_side: int = 1024,
+    ) -> None:
         try:
             import torch
             from transformers import AutoModel, AutoProcessor, AutoTokenizer
@@ -40,26 +46,50 @@ class LocateAnythingLocator:
 
         self._torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        # Box outputs are short; a big cap just wastes KV-cache memory.
+        self.max_new_tokens = max_new_tokens
+        # Cap the longest image side fed to the model — visual tokens (and the
+        # memory they cost) scale with image area. Coordinates come back
+        # normalized 0..1000, so downscaling does not affect box accuracy.
+        self.max_image_side = max_image_side
+
         self.tokenizer = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
         self.processor = AutoProcessor.from_pretrained(model, trust_remote_code=True)
         self.model = (
             AutoModel.from_pretrained(
-                model, torch_dtype=torch.bfloat16, trust_remote_code=True
+                model,
+                torch_dtype=torch.bfloat16,
+                trust_remote_code=True,
+                low_cpu_mem_usage=True,  # avoid an fp32 spike during load
             )
             .to(self.device)
             .eval()
         )
+        if self.device == "cuda":
+            torch.cuda.empty_cache()
 
     def locate(self, image_path: str, queries: list[str]) -> dict[str, list[Box]]:
         from PIL import Image
 
         image = Image.open(image_path).convert("RGB")
-        w, h = image.size
+        w, h = image.size  # keep ORIGINAL size for coordinate scaling
+        model_image = self._downscale(image)
         out: dict[str, list[Box]] = {}
         for q in queries:
-            text = self._raw_inference(image, self._prompt(q))
+            text = self._raw_inference(model_image, self._prompt(q))
             out[q] = self._parse_boxes(text, q, (w, h))
+            if self.device == "cuda":
+                self._torch.cuda.empty_cache()
         return out
+
+    def _downscale(self, image):
+        """Shrink the image so its longest side <= max_image_side."""
+        longest = max(image.size)
+        if longest <= self.max_image_side:
+            return image
+        scale = self.max_image_side / longest
+        new_size = (round(image.size[0] * scale), round(image.size[1] * scale))
+        return image.resize(new_size)
 
     @staticmethod
     def _prompt(query: str) -> str:
@@ -89,7 +119,7 @@ class LocateAnythingLocator:
                 input_ids=inputs["input_ids"],
                 attention_mask=inputs["attention_mask"],
                 tokenizer=self.tokenizer,
-                max_new_tokens=2048,
+                max_new_tokens=self.max_new_tokens,
                 generation_mode="hybrid",
                 use_cache=True,  # the model asserts this is required
             )
