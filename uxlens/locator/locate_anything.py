@@ -91,6 +91,7 @@ class LocateAnythingLocator:
                 tokenizer=self.tokenizer,
                 max_new_tokens=2048,
                 generation_mode="hybrid",
+                use_cache=True,  # the model asserts this is required
             )
         return self._decode(response)
 
